@@ -115,16 +115,77 @@ O Modelo inicial é mostrado abaixo:
  
 ![modelagem TODO](./resources/images/modelagem_todo.png)
 
+Crie a classe Todo Conforme o modelo acima.
+
+## Configurando persistência no projeto *persisntence.xml*
+
+Para utilizar a API em nosso projeto, precisaremos configurar um arquivo xml onde serão descritos os metadados da nossa conexão e as classes transformadas em Entidades.
+
+Para isso vamos criar uma pasta chamada **META-INF** dentro da pasta *src/main/resources*, com a pasta META-INF criada, crie o arquivo **persistence.xml**, dentro da pasta META-INF.
+
+Adicione o conteúdo abaixo no arquivo.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="todo" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <!-- classes -->
+    <!-- properties -->
+  </persistence-unit>
+</persistence>
+```
+
+Observe que no arquivo estamos configurando para utilizar a JPA 2.1, e nosso **persistence unit** chamamos de **todo**, como estamos fazendo um projeto JavaSE, precisamos marcar o **tipo de transação** para *RESOURCE_LOCAL*.
+
+Já com tudo isso configurado, precisamos agora adicionar as propriedades da nossa conexão:
+
+
+```xml
+    ...
+    <properties>
+      <property name="javax.persistence.jdbc.driver"   value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/posjava?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.password" value="morgado"/>
+      <property name="javax.persistence.jdbc.user"     value="root"/>
+      <property name="eclipselink.logging.level"       value="FINE"/>
+      <property name="eclipselink.ddl-generation"      value="drop-and-create-tables"/>
+    </properties>
+    ...
+```
+Para cada banco de dados que formos utilizar, teremos diferentes configurações para jdbc driver, consulte o fornecedor do driver que for utilizar, da mesma forma, a url sofre alterações.
+
+Observe que o eclipselink permite que configuremos log o que é muito útil em um cenário de solução de prolemas, para mais informações sobre log consulte em [EclipseLink JPA Logging](https://wiki.eclipse.org/EclipseLink/Examples/JPA/Logging)
+
+Podemos realizar estas configurações utilizando a IDE.
+
+> TODO Adicionar aqui o procedimento que mostrei na sala de aula, adicionando pela ide com o plugi Dali.
+
+- Configurar uma conexão;
+- Adicionar o Facet de JPA ao projeto;
+- Adicionando propriedades através da interface; 
 
 ### Criando uma entidade
 
-Dando continuidade ao nosso projeto, vamos transformar nossa classe TodoList em uma entidade. para isso iremos adicionar a annotation **@Entity**, e vamos definir também um identificador através da annotation **@Id**.
+Com nossa unidade de persistência configurada podemos agora criar entidades, então vamos transformar nossa classe Todo em uma entidade. para isso iremos adicionar a annotation **@Entity**, e vamos definir também um identificador através da annotation **@Id**.
 
-> As annotations podem ser colocadas em nos _fields_ da classe ou nos métodos _getters_
+> As annotations podem ser colocadas nas classes, nos _fields_ **ou** nos métodos _getters_!
+
+#### Adicionado adicionando a Entidade ao persistence Unit
+
+Para que o JPA tome conhecimendo da nossa entidade, precisamos dizer quais classes fazem parte da unidade de persistencia que criamos, para isso adicione o código abaixo ao persistence.xml
+
+```xml
+<class>posjava.persistence.entities.Todo</class>
+```
 
 Com esta pequena configuração, estamos prontos para persistir nossa Entity.
 
 Isso leva a uma questão, em que local no meu banco esta tabela será persistida?
+
 Em que colunas da tabela os campos da classe serão persistidos?
 
 ### Entity Manager
@@ -138,6 +199,8 @@ Obtendo um _EntityManager_, o _EntityManager_ é sempre obtido através de um _E
 EntityManagerFactory emf = Persistence.createEntityManagerFactory( "persistence_unit");
 EntityManager em = emf.createEntityManager();
 ```
+
+A partir daqui, é interessante utilizar o maven para compilar o projeto e colocar o persistence.xml no CLASSPATH
 
 ### Persistindo uma entidade
 

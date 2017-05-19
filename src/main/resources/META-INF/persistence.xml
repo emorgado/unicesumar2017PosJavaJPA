@@ -6,12 +6,12 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	
 	<persistence-unit name="posjavaPU" transaction-type="RESOURCE_LOCAL">
-		<class>posjava.persistency.jpa.entity.Todo</class>
+		<class>posjava.persistence.entities.Todo</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver"   value="com.mysql.jdbc.Driver"/>
 	      	<property name="javax.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/posjava?zeroDateTimeBehavior=convertToNull"/>
-	      	<property name="javax.persistence.jdbc.password" value=""/>
 	      	<property name="javax.persistence.jdbc.user"     value="root"/>	
+	      	<property name="javax.persistence.jdbc.password" value="morgado"/>
 	      	<property name="eclipselink.logging.level"       value="FINE"/>
 	      	<property name="eclipselink.ddl-generation"      value="drop-and-create-tables"/>
 	      	<property name="javax.persistence.schema-generation.create-database-schemas" value="true"/>
