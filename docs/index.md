@@ -188,7 +188,7 @@ Isso leva a uma questão, em que local no meu banco esta tabela será persistida
 
 Em que colunas da tabela os campos da classe serão persistidos?
 
-### Entity Manager
+## Entity Manager
 
 Para o funcionamento da API, precisamos de algum mecanismo que controle as operações na entidade, no JPA esta tarefa é delegada a um objeto chamado convenientemente de **EntityManager**.
 
@@ -201,6 +201,8 @@ EntityManager em = emf.createEntityManager();
 ```
 
 A partir daqui, é interessante utilizar o maven para compilar o projeto e colocar o persistence.xml no CLASSPATH
+
+## Operações básicas
 
 ### Persistindo uma entidade
 
