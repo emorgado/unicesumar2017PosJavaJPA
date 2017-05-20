@@ -7,11 +7,17 @@
 	
 	<persistence-unit name="posjavaPU" transaction-type="RESOURCE_LOCAL">
 		<class>posjava.persistence.entities.Todo</class>
+		<class>posjava.persistence.entities.EmpregadoFieldAccess</class>
+		<class>posjava.persistence.entities.EmpregadoPropertyAccess</class>
+		<class>posjava.persistence.entities.EmpregadoMixedAccess</class>
+		<class>posjava.persistence.entities.Empregado</class>
+		<class>posjava.persistence.entities.Departamento</class>
+		<class>posjava.persistence.entities.Garagem</class>
+		<class>posjava.persistence.entities.Projeto</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver"   value="com.mysql.jdbc.Driver"/>
 	      	<property name="javax.persistence.jdbc.url"      value="jdbc:mysql://localhost:3306/posjava?zeroDateTimeBehavior=convertToNull"/>
-	      	<property name="javax.persistence.jdbc.user"     value="root"/>	
-	      	<property name="javax.persistence.jdbc.password" value="morgado"/>
+	      	<property name="javax.persistence.jdbc.user"     value="root"/>
 	      	<property name="eclipselink.logging.level"       value="FINE"/>
 	      	<property name="eclipselink.ddl-generation"      value="drop-and-create-tables"/>
 	      	<property name="javax.persistence.schema-generation.create-database-schemas" value="true"/>
