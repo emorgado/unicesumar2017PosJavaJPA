@@ -174,7 +174,7 @@ Com nossa unidade de persistência configurada podemos agora criar entidades, en
 
 > As annotations podem ser colocadas nas classes, nos _fields_ **ou** nos métodos _getters_!
 
-#### Adicionado adicionando a Entidade ao persistence Unit
+#### Adicionando a Entidade ao persistence Unit
 
 Para que o JPA tome conhecimendo da nossa entidade, precisamos dizer quais classes fazem parte da unidade de persistencia que criamos, para isso adicione o código abaixo ao persistence.xml
 
@@ -247,3 +247,274 @@ Existe diversas formas de atualizar uma entidade, vamos ver o caso mais simples 
 Todo todo = em.find( Todo.class, 1 );
 todo.setNome("JPA é bacana");
 ```
+
+
+///
+
+## Acessando o estado da entidade
+
+Existe duas formas de especificar o estado de persistente de uma entidade, podemos anotar campos *fields* ou as propriedades no estilo JavaBeans (getters). Se você anotar os campos, estes serão utilizados para recuperar o estado de persistência do banco, se anotar as propriedades (métodos) elas serão utilizadas.
+
+
+### Acesso por campos
+
+Se você anotar os campos da classe, o provedor irá utilizar os campos para para pegar e para configurar o estado da entidade, as propriedades (getters and setters) podem nem mesmo existir, porem se existirem elas serão ignoradas pelo provedor. Todos os campos devem ser protectec, package ou private. Outras entidades devem acessar os métodos da entidade a fim de acessar o estado de persistência. Somente a propria entidade deve manipular seus campos.
+
+```java
+@Entity
+public class EmpregadoFieldAccess {
+    @Id
+    private long   id;
+    private String name;
+    private long   salario;
+
+    public long   getId() { return id;}
+    public void   setId( long id ) { this.id = id;}
+
+    public String getName() { return name; }
+    public void   setName( String name ) { this.name = name; }
+
+    public long   getSalario() { return salario; }
+    public void   setSalario( long salario ) { this.salario = salario; }
+
+}
+```
+
+### Acesso por propriedades
+
+Quando o acesso por propriedades é utilizado se aplica as mesmas regras do JavaBean, e deve haver getters e setters para as propriedades persistentes, *O tipo de propriedade é determinado pelo tipo do retorno do método get* e deve ser o mesmo do único parametro passado no método set, os métodos também devem ser *public* ou *protected*, A anotação deve estar no método get.
+
+A classe EmpregadoPropertyAccess, tem uma anotação **@Id** no método getId(), assim o provedor irá usar o acesso por propriedade. o nome e o salário também se tornam preristentes por propriedade. note que a property salário utiliza um capo chamado ordenado. Execute o projeto e veja como o mapeamento fica no banco. 
+
+```java
+@Entity
+public class EmpregadoPropertyAccess {
+
+    private long   id;
+    private String name;
+    private long   ordenado;
+
+    @Id
+    public long   getId() { return id;}
+    public void   setId( long id ) { this.id = id;}
+
+    public String getName() { return name; }
+    public void   setName( String name ) { this.name = name; }
+
+    public long   getSalario() { return ordenado; }
+    public void   setSalario( long salario ) { this.ordenado = salario; }
+
+}
+```
+### Acesso misto
+
+É possível também combinar o acesso por **field** e por **property** na mesma hierarquia ou mesma entidade. para isso Adicione a anotação **@Access** com o modo de acesso especificado.
+
+A anotação **@Access** também é util quando queremos realizar transformações nos dados ao ler o escrever no banco. 	
+
+Vamos criar uma nova classe para e marcar o modo de acesso como **FIELD** e realizar uma transormação no campo telefone. Se não marcarmos a classe como field, termos o método de acesso indefinido *(que irá gerar erro)*, pois estamos marcando os fields e as properties.
+
+O próximo passo é anotar o método que iremos utilizar para fazer a transformação do telefone com o tipo de acesso **PROPERTY**, note que estamos passando o nome da coluna *telefone* neste método.
+
+O útimo detalhe é marcar o field telefone como **@Transient**, para que o acesso default **FIELD** não faça com que o campo seja persistido duas vezes.
+
+```java
+@Entity
+@Access( AccessType.FIELD )
+public class EmpregadoMixedAccess {
+
+    public static final String CODIDO_AREA_LOCAL = "44";
+    
+    @Id 
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    private long     id;
+    @Transient 
+    private String   telefone;
+
+    public long      getId() { return id; }
+    public void      setId( long id ) { this.id = id; }
+
+    public String    getTelefone() { return telefone; }
+    public void      setTelefone( String telefone ) { this.telefone = telefone; }
+
+    @Access( AccessType.PROPERTY )
+    @Column( name="telefone")
+    protected String getTelefoneForDb() {
+        if( telefone.length() == 9 ){
+            return telefone;
+        } else {
+            return CODIDO_AREA_LOCAL + telefone;
+        }
+    }
+    protected void setTelefoneForDb( String numeroTelefone ) {
+        if( numeroTelefone.startsWith( CODIDO_AREA_LOCAL )) {
+            telefone = numeroTelefone.substring( 2 );
+        } else {
+            telefone = numeroTelefone;
+        }
+    }
+
+}
+```
+## Mapeamento
+
+### Mapeando para uma tabela
+
+Até agora utilizamos nos vimos casos simples, onde nossa entidade não utilizou nenhum mapeamento de tabela, somente utilizamos a anotação **@Entity** para criar e mapear nossa entidade para uma tabela.
+Nestes casos o nome da tabela padrão é um nome não qualificado da entidade, que apesar de funcionar bem, pode não atender a todas as necessidades, podemos por exemplo precisar mapear para uma tabela com um nome específico, fazemos isso utilizando a anotação **@Table** e incluindo um elemento *name*.
+ 
+```java
+@Entity
+@Table(name="EMP")
+public class Empregado { ... }
+```
+
+Podemos também passar o nome do schema, quando necessário: 
+
+```java
+@Entity
+@Table(name="EMP", schema="RH")
+public class Empregado { ... }
+```
+
+Quando especificado o schema, o nome da tabela será precedido por este.
+
+Alguns bancos de dados também usam o conceito de catálogo, podemos da mesma forma utilizar um elemento catalog.
+
+```java
+@Entity
+@Table(name="EMP", catalog="RH")
+public class Empregado { ... }
+```
+
+### Mapeando colunas
+
+  O modelo orientado a objeto não se preocupa com qual é o nome físico do campo, ou seja o que estará na tabela, de fato, ele nunca precisa saber esta informação, os campos na verdade podem estar mapeados em um arquivo xml externo.
+  Para definir o nome da coluna que nosso campo esta mapeado utilizamos a anotação **@Column** com o elemento **name** que nos permite informar qual o nome da columa na tabela.
+  
+```java
+@Entity
+@Table(name="EMPREGADOS")
+public class Empregado { 
+
+	@Id
+	@Column( name="EMP_ID" )
+	private long   id;
+	private String name;
+	@Column( name="SAL" )
+	private long   salario;
+	@Column( name="COM" )
+	private String comentarios;	
+	// ...
+}
+```
+
+### Lazy Fetching 
+
+Sabemos que alguns campos serão pouco acessados, nestas situações podemos otimizar o desempenho quando recuperamos uma entidade buscando somente as partes que sabemos que serão frequentemente acessadas, o restante será acessado somente quando e se for solicitado.
+
+> Esta funcionalidade tambem é conhecida por outros nomes tais como: lazy loading, deferred loading, lazy fetching, on-demand fetching, just-in-time reading entre outas.
+
+O modo de busca pode ser configurado para ser EAGER *(impaciente)* ou LAZY *(preguiçoso)*, para isso utilizamos na anotação **@Basic** o elemento **fetch** como sendo um dos definidos no enum **FetchType**.
+Marcando como lazy, o valor da coluna só será buscado quando for solicitado, o valor padrão é pegar os campode de forma EAGER.
+ 
+```java
+@Entity
+public class Empregado { 
+	
+	// ...
+	@Basic( fetch=FetchType.LAZY )
+	@Column( name="COM" )
+	private String comentarios;	
+	// ...
+}
+```
+Antes de usar esta característica, tem algumas coisas que precisamos saber sobre busca lazy de atributos, primeiro emais improtante, a diretiva LAZY é somente uma dica para o provedor de persistência para ajudar a conseguir desempenho, porém não é requerido que ele respeite o pedido, porque o comportamento da entidade pode não ser comprometido.
+Porem, especificar que o atributo deve ser carregado como EAGER ele será buscado, e isso é importante, para quando o objeto estiver **detached**, destacado do contexto de persistência.
+Utilize esta caracaterística somente em objetos muito grandes, e que você sabe que não serão acessados, para tipos simples não vale o custo de uma nova chamada.
+
+
+## Relacionamentos
+
+### Many-to-One
+
+O mapeamento muitos para um, é obtido através da anotação **@ManyToOne**.
+
+![many to one](./resources/images/many_to_one_uml.png) |
+ 
+```java
+@Entity
+public class Empregado {
+
+    @Id
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    private long         id;
+    private String       nome;
+    private String       salario;
+    @ManyToOne
+    private Departamento departamento;
+    // ... 
+}    
+```
+
+```java
+@Entity
+public class Departamento {
+
+    @Id
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    private long         id;
+    private String       nome;   
+    // ... 
+}    
+```
+
+### Join Columns
+
+Em um banco de dados, mapear um relacionamento significa que uma tabela tem uma referencia para outra tabela, Em termos de banco de dados uma columa que referencia uma chave (geralmente chave primária) em outra tabela é uma chave estrangeira. Em JPA, elas são chamadas **join columns**, e a anotação **@JoinColumn** é a anotação primária para estes tipos de columas.
+
+Considere as tabelas EMPREGADOS e DEPARTAMENTOS, que corresponder as entidades Empregado e Departamento, mostradas abaixo, a tabela EMPREGADOS tem uma chave estrangeira, DEPT_ID que referencia a tabela DEPARTAMENTOS, da perspectiva de Entidade relacionamento, DEPT_ID é a join column que associa as entidades Empregardo e Departamento.
+
+![tabelas muitos para um ](./resources/images/many_to_one_db.png)
+
+Em quase todo relacionamento, independento do lado origem ou destino, um dos dois terá uma coluna de ligação em sua tabela, E este lado é o que chamamos de owning side ou dono do relacionamento.
+
+A anotação **@JoinColumn** é sempre definida no dono do relacionamento.
+
+### Mapeamento OneToOne
+
+Continuando em nosso exemplo vamos definir que um empregado pode ter uma garagem, vamos criar um relacionamento um para um entre Empregado e Garagem.
+
+![um para um entidades](./resources/images/one_to_one_uml.png)
+
+![um para um tabelas](./resources/images/one_to_one_db.png)
+
+### Mapeamento OneToOne bidirecional
+
+Funciona da mesma forma que o unidirecional, porem adicionamos a anotação em ambas as entidades.
+
+![um para um entidades](./resources/images/one_to_one_bi_uml.png)
+
+![um para um tabelas](./resources/images/one_to_one_bi_tbl.png)
+
+
+### Mapeamento Um para muitos
+
+O relacionamento OneToMany é funciona igual o ManyToOne porem agora o owning side é o Departamento, note que precisamos informar qual é o elemento **mappedBy**, neste caso se não especificarmos o mappedBy será tratado como um relacionamento unidirecional.
+
+```java
+@Entity
+public class Departamento {
+
+    @Id
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    private long   id;
+    private String nome;
+    
+    @OneToMany(mappedBy="departamento")
+    private Collection<Empregado> empregados;
+    // ...
+}    
+```
+
+
