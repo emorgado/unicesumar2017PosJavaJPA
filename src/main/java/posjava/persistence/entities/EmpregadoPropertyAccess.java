@@ -9,28 +9,39 @@ import javax.persistence.Id;
 public class EmpregadoPropertyAccess {
 
     private Long   id;
-	private String nome;
-	private long   ordenado;
-	
-	@Id @GeneratedValue( strategy = GenerationType.IDENTITY )
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getNome() {
-		return nome;
-	}
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-	public long getSalario() {
-		return ordenado;
-	}
-	public void setSalario(long salario) {
-		this.ordenado = salario;
-	}
-	
-	
+    private String nome;
+    private long   ordenado;
+
+    @Id
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    public Long getId() {
+
+        return id;
+    }
+
+    public void setId( Long id ) {
+
+        this.id = id;
+    }
+
+    public String getNome() {
+
+        return nome;
+    }
+
+    public void setNome( String nome ) {
+
+        this.nome = nome;
+    }
+
+    public long getSalario() {
+
+        return ordenado;
+    }
+
+    public void setSalario( long salario ) {
+
+        this.ordenado = salario;
+    }
+
 }

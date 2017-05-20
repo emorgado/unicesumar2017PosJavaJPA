@@ -1,5 +1,6 @@
 package posjava.persistence.entities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Basic;
@@ -18,72 +19,136 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "EMPREGADOS")
+@Table( name = "EMPREGADOS" )
 // @Table( name="EMPREGADOS", schema="RH" )
 // @Table( name="EMPREGADOS", catalog="RH" )
 public class Empregado {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "EMP_ID")
-	private long id;
+    @Id
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    @Column( name = "EMP_ID" )
+    private long                  id;
 
-	@Column(name = "EMP_NOME")
-	private String nome;
+    @Column( name = "EMP_NOME" )
+    private String                nome;
 
-	@Column(name = "SAL")
-	private long salario;
+    @Column( name = "SAL" )
+    private long                  salario;
 
-	@Column(name = "COM")
-	//@Basic( fetch=FetchType.LAZY )  // -- Orienta para não trazer o valo da coluna no campo até ser necessário, porem o provider não é obrigado a respeitar isso
-	//@Basic( fetch=FetchType.EAGER ) // -- Obrigatoriamente traz o valor da coluna no campo 
-	private String comentario;
+    @Column( name = "COM" )
+    // @Basic( fetch=FetchType.LAZY ) // -- Orienta para não trazer o valo da
+    // coluna no campo até ser necessário, porem o provider não é obrigado a
+    // respeitar isso
+    // @Basic( fetch=FetchType.EAGER ) // -- Obrigatoriamente traz o valor da
+    // coluna no campo
+    private String                comentario;
 
-	@ManyToOne
-	@JoinColumn( name="DEPT_ID")
-	private Departamento departamento;
-	
-	@OneToOne
-	@JoinColumn( name="GRG_ID")
-	private Garagem garagem;
-	
-	@ManyToMany
-	@JoinTable( name="EMP_PROJ",
-	            joinColumns=@JoinColumn( name="EMP_ID"),
-				inverseJoinColumns=@JoinColumn( name="PROJ_ID")
-			  )	
-	private Collection<Projeto> projetos;
-	
-	public long getId() {
-		return id;
-	}
+    @ManyToOne
+    @JoinColumn( name = "DEPT_ID" )
+    private Departamento          departamento;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    @OneToOne
+    @JoinColumn( name = "GRG_ID" )
+    private Garagem               garagem;
 
-	public String getNome() {
-		return nome;
-	}
+    @ManyToMany
+    @JoinTable( name = "EMP_PROJ", joinColumns = @JoinColumn( name = "EMP_ID" ), inverseJoinColumns = @JoinColumn( name = "PROJ_ID" ) )
+    private Collection< Projeto > projetos;
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public Empregado() {
 
-	public long getSalario() {
-		return salario;
-	}
+        super();
+    }
 
-	public void setSalario(long salario) {
-		this.salario = salario;
-	}
+    public Empregado( String nome ) {
 
-	public String getComentario() {
-		return comentario;
-	}
+        super();
+        this.nome = nome;
+    }
 
-	public void setComentario(String comentario) {
-		this.comentario = comentario;
-	}
+    public long getId() {
+
+        return id;
+    }
+
+    public void setId( long id ) {
+
+        this.id = id;
+    }
+
+    public String getNome() {
+
+        return nome;
+    }
+
+    public void setNome( String nome ) {
+
+        this.nome = nome;
+    }
+
+    public long getSalario() {
+
+        return salario;
+    }
+
+    public void setSalario( long salario ) {
+
+        this.salario = salario;
+    }
+
+    public String getComentario() {
+
+        return comentario;
+    }
+
+    public void setComentario( String comentario ) {
+
+        this.comentario = comentario;
+    }
+
+    public Departamento getDepartamento() {
+
+        return departamento;
+    }
+
+    public void setDepartamento( Departamento departamento ) {
+
+        this.departamento = departamento;
+    }
+
+    public Garagem getGaragem() {
+
+        return garagem;
+    }
+
+    public void setGaragem( Garagem garagem ) {
+
+        this.garagem = garagem;
+    }
+
+    public Collection< Projeto > getProjetos() {
+
+        return projetos;
+    }
+
+    public void setProjetos( Collection< Projeto > projetos ) {
+
+        this.projetos = projetos;
+    }
+    
+    public void addProjeto( Projeto projeto ){
+        if( this.projetos == null ){
+            this.projetos = new ArrayList<>();
+        }
+        this.projetos.add( projeto );
+    }
+
+    @Override
+    public String toString() {
+
+        return String.format( "Empregado: %20s ", nome );
+    }
+    
+    
 
 }
